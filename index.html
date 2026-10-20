@@ -11,14 +11,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Elms+Sans&family=Outfit:wght@400;500;600&display=swap">
 <style>
-/* Layout: opens full screen on her own footage (three vertical clips side by side on desktop, one on
-   phones), then one signature moment where the two ovals of her mark slide together and lock.
+/* Layout: opens full screen on her own footage (three vertical clips on desktop, one on phones), then one
+   signature moment where the two ovals of her mark slide together and ink webs form where they cross.
    Everything after is calm, left-aligned and evenly gridded.
-   Shape rule: pills for buttons and chips, 24px for photo frames and cards, 12px for fields, ovals only for the motif.
+   Line: her logo's thick-thin stroke. Actions are words circled in that line, never pills; the form's
+   submit is a filled oval. Bullets are tiny open ovals.
+   Shape rule: 24px for the service cards (her brand tiles), 6px for photos, 10 to 12px for the form, ovals for the motif.
    Colour meaning: brown is ink, sky is a quiet surface, moss means "start a conversation".
    Contrast (WCAG 2.2 AA, computed): ink on paper 15.6:1, ink on sky 11.7:1, paper on moss 6.3:1,
    moss on paper 6.3:1, ink-soft on paper 8.5:1, ink-soft on sky 6.4:1, paper on ink 15.6:1.
-   Hero text sits on a scrim of at least 70% ink. Motion: GSAP, off under reduced motion; nothing is hidden at rest.
+   Hero text sits on a scrim of at least 60% ink. Motion: the oval moment only, off under reduced motion; nothing hidden at rest.
    Single light theme on purpose: this is her brand, shown as it will look. */
 :root {
   --paper: #fff9ec;
@@ -37,7 +39,12 @@
   --max: 1280px;
   --header-h: 76px;
   --bar-h: 44px;
+  --r-card: 24px;
+  --r-photo: 6px;
+  --r-field: 10px;
   color-scheme: light;
+  accent-color: var(--moss);
+  scrollbar-color: var(--ink-soft) var(--paper);
 }
 
 html { scroll-behavior: smooth; scroll-padding-top: 96px; }
@@ -49,9 +56,10 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
 }
+::selection { background: var(--sky); color: var(--ink); }
 h1, h2, h3, h4, p, ul, figure, fieldset { margin: 0; }
 ul { padding: 0; list-style: none; }
-a { color: inherit; }
+a { color: inherit; text-underline-offset: 0.22em; text-decoration-thickness: 1px; }
 img, svg, video { max-width: 100%; }
 main { overflow-x: clip; }
 
@@ -63,14 +71,14 @@ main { overflow-x: clip; }
 }
 .skip {
   position: absolute; left: 12px; top: -80px; z-index: 50;
-  background: var(--ink); color: var(--paper); padding: 12px 18px; border-radius: 999px;
+  background: var(--ink); color: var(--paper); padding: 12px 18px;
 }
 .skip:focus { top: 12px; }
 
 /* Type scale */
 .h1 {
   font-family: var(--display); font-weight: 400;
-  font-size: clamp(2.5rem, 6.2vw, 5.75rem); line-height: 1.02; letter-spacing: -0.028em;
+  font-size: clamp(2.5rem, 5.4vw, 4.75rem); line-height: 1.04; letter-spacing: -0.026em;
   text-wrap: balance;
 }
 .h2 {
@@ -83,37 +91,53 @@ main { overflow-x: clip; }
 p { max-width: 62ch; text-wrap: pretty; }
 .lead { font-size: clamp(1.1875rem, 1.55vw, 1.375rem); line-height: 1.55; color: var(--ink-soft); }
 .small { font-size: 1rem; }
-.select { user-select: all; font-weight: 500; }
-
-/* Actions */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  min-height: 52px; padding: 0 26px; border: 0; border-radius: 999px;
-  background: var(--moss); color: var(--paper);
-  font: 500 1.125rem/1 var(--text); text-decoration: none; cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-.btn:hover { background: var(--moss-deep); }
-.btn--sm { min-height: 46px; padding: 0 20px; }
-.link {
-  display: inline-flex; align-items: center; min-height: 44px;
-  font-weight: 500; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 6px;
-}
-.link:hover { text-decoration-thickness: 2px; }
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 
-/* Node marker: the pinched crossing point from her logo, used as the one small motif */
-.node { width: 10px; height: 10px; background: var(--moss); flex: none;
-  clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%); }
-.dots { display: grid; gap: 8px; }
-.dots li { display: flex; align-items: baseline; gap: 12px; }
-.dots li::before {
-  content: ""; width: 10px; height: 10px; flex: none; background: var(--moss); transform: translateY(1px);
-  clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
+/* Actions: a phrase circled in her line. A second open oval joins on hover, her mark in miniature. */
+.cta {
+  position: relative; display: inline-grid; place-items: center; box-sizing: border-box; min-height: 62px;
+  padding: 14px 36px 16px; color: inherit; text-decoration: none;
+  font: 400 1.25rem/1.1 var(--display); letter-spacing: -0.005em; white-space: nowrap;
+}
+.cta--sm { min-height: 50px; padding: 10px 26px 12px; font-size: 1.125rem; }
+.cta__text { position: relative; }
+.cta__ring {
+  position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;
+  fill: currentColor; transform: rotate(-2.5deg); transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.cta__echo {
+  position: absolute; top: 6%; right: -20%; width: 44%; height: 88%; overflow: visible;
+  fill: none; stroke: currentColor; stroke-width: 1.6; vector-effect: non-scaling-stroke;
+  opacity: 0; transform: translateX(-16px);
+  transition: opacity 0.3s ease, transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.cta:focus-visible { outline: 2px solid currentColor; outline-offset: 6px; border-radius: 50%; }
+.cta:focus-visible .cta__echo { opacity: 1; transform: none; }
+@media (hover: hover) {
+  .cta:hover .cta__ring { transform: rotate(0.5deg); }
+  .cta:hover .cta__echo { opacity: 1; transform: none; }
 }
 
-/* Photos: Allie's own, from her portfolio. 24px frames, set crops, sky behind while loading. */
-.photo { margin: 0; border-radius: 24px; overflow: hidden; background: var(--sky); max-width: 100%; }
+/* The form's submit: a filled oval */
+.oval-btn {
+  display: inline-grid; place-items: center; min-height: 66px; padding: 0 44px; border: 0; border-radius: 50%;
+  background: var(--moss); color: var(--paper); font: 400 1.25rem/1 var(--display); cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.oval-btn:hover { background: var(--moss-deep); }
+.oval-btn:focus-visible { outline-offset: 5px; }
+
+/* Bullets and separators: tiny open ovals from the mark */
+.dots { display: grid; gap: 8px; }
+.dots li { display: flex; align-items: baseline; gap: 12px; }
+.dots li::before, .node {
+  content: ""; flex: none; width: 10px; height: 7px; border: 1.3px solid var(--moss); border-radius: 50%;
+  box-sizing: border-box;
+}
+.dots li::before { transform: translateY(-1px); }
+
+/* Photos: Allie's own, from her portfolio. Small corners, set crops, sky behind while loading. */
+.photo { margin: 0; border-radius: var(--r-photo); overflow: hidden; background: var(--sky); max-width: 100%; }
 .photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .photo--45 { aspect-ratio: 4 / 5; }
 .photo--34 { aspect-ratio: 3 / 4; }
@@ -122,22 +146,21 @@ p { max-width: 62ch; text-wrap: pretty; }
 /* Concept bar */
 .concept { background: var(--ink); color: var(--paper); font-size: 1rem; line-height: 1.45; }
 .concept .wrap { display: flex; flex-wrap: wrap; gap: 4px 20px; justify-content: space-between; padding-block: 10px; }
-.concept a { display: inline-flex; align-items: center; min-height: 44px; margin-block: -10px; color: var(--paper); text-underline-offset: 3px; }
+.concept a { display: inline-flex; align-items: center; min-height: 44px; margin-block: -10px; color: var(--paper); }
 .concept :focus-visible { outline-color: var(--paper); }
 .concept__short { display: none; }
 @media (max-width: 480px) { .concept__long { display: none; } .concept__short { display: inline; } }
 
-/* Header: solid by default; clear over the hero once the script confirms the hero is behind it */
+/* Header: solid paper; clear only while the page sits at the top of the hero */
 .site-header {
   position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10;
-  background: rgba(255, 249, 236, 0.94); backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--rule); color: var(--ink);
+  background: var(--paper); border-bottom: 1px solid var(--rule); color: var(--ink); overflow-x: clip;
   transition: background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease;
 }
-.site-header .wrap { display: flex; align-items: center; gap: 20px; min-height: var(--header-h); }
 .site-header.no-anim { transition: none; }
-.site-header.is-clear { background: transparent; border-color: transparent; backdrop-filter: none; color: var(--paper); }
+.site-header.is-clear { background: transparent; border-color: transparent; color: var(--paper); }
 .site-header.is-clear :focus-visible { outline-color: var(--paper); }
+.site-header .wrap { display: flex; align-items: center; gap: 20px; min-height: var(--header-h); }
 .brand { display: inline-flex; align-items: center; min-height: 44px; margin-right: auto; color: inherit; }
 .wordmark {
   display: block; width: clamp(156px, 15vw, 196px); aspect-ratio: 1225 / 290; background: currentColor;
@@ -148,11 +171,8 @@ p { max-width: 62ch; text-wrap: pretty; }
   -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat;
 }
 .nav { display: flex; gap: 4px; }
-.nav a {
-  display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px;
-  font-size: 1.125rem; text-decoration: none; border-radius: 999px;
-}
-.nav a:hover { text-decoration: underline; text-underline-offset: 6px; }
+.nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; font-size: 1.125rem; text-decoration: none; }
+.nav a:hover { text-decoration: underline; }
 
 /* Hero: her footage, full screen. Clips load only where they show; posters stand in until then. */
 .hero {
@@ -171,25 +191,25 @@ p { max-width: 62ch; text-wrap: pretty; }
 .hero__scrim {
   position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background:
-    linear-gradient(to top, rgba(var(--scrim), 0.86) 0%, rgba(var(--scrim), 0.72) 30%, rgba(var(--scrim), 0.18) 62%, rgba(var(--scrim), 0) 76%),
+    linear-gradient(to top, rgba(var(--scrim), 0.9) 0%, rgba(var(--scrim), 0.8) 34%, rgba(var(--scrim), 0.5) 58%, rgba(var(--scrim), 0.12) 78%, rgba(var(--scrim), 0) 88%),
     linear-gradient(to bottom, rgba(var(--scrim), 0.55) 0, rgba(var(--scrim), 0) 150px);
 }
 .hero .wrap { width: 100%; box-sizing: border-box; padding-block: calc(var(--header-h) + 48px) clamp(40px, 7vh, 88px); }
-.hero__copy { display: grid; gap: 24px; max-width: 760px; }
-.hero .h1 { max-width: 16ch; }
-.hero .lead { color: var(--paper); max-width: 46ch; }
+.hero__copy { display: grid; gap: 26px; max-width: 820px; justify-items: start; }
+.hero .h1 { max-width: 20ch; }
+.hero .lead { color: var(--paper); max-width: 44ch; }
+.hero .cta { margin-top: 6px; margin-left: -6px; }
 .hero :focus-visible { outline-color: var(--paper); }
-.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; }
 .hero__pause {
   position: absolute; z-index: 1;
   right: max(var(--gutter), env(safe-area-inset-right, 0px)); bottom: clamp(40px, 7vh, 88px);
-  display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 16px;
-  border: 1.5px solid rgba(255, 249, 236, 0.7); border-radius: 999px;
-  background: rgba(var(--scrim), 0.35); color: var(--paper); font: 500 1rem/1 var(--text); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 4px;
+  border: 0; background: none; color: var(--paper); font: 500 1.125rem/1 var(--text); cursor: pointer;
 }
-.hero__pause:hover { background: rgba(var(--scrim), 0.6); }
-.hero__pause-icon { width: 10px; height: 12px; border-inline: 3px solid currentColor; box-sizing: border-box; }
-.hero__pause[aria-pressed="true"] .hero__pause-icon { border: 0; border-left: 10px solid currentColor; border-block: 6px solid transparent; }
+.hero__pause:hover .hero__pause-text { text-decoration: underline; text-underline-offset: 0.22em; }
+.hero__pause svg { width: 12px; height: 14px; fill: currentColor; }
+.hero__pause .i-play, .hero__pause[aria-pressed="true"] .i-pause { display: none; }
+.hero__pause[aria-pressed="true"] .i-play { display: block; }
 
 /* Sections */
 .section .wrap { padding-block: var(--section); }
@@ -199,28 +219,16 @@ p { max-width: 62ch; text-wrap: pretty; }
 .band--moss :focus-visible { outline-color: var(--paper); }
 .section-head { display: grid; gap: 16px; margin-bottom: clamp(36px, 4.5vw, 64px); }
 
-/* The connection: her mark, built from two ideas. Resting state is the finished mark. */
+/* The connection: her two ovals, drawn in her thick-thin line, meet and ink webs form at the crossings.
+   Resting state is the finished mark. */
 .connect .wrap { display: grid; gap: clamp(32px, 4vw, 56px); padding-block: var(--section); }
 .connect .h2 { max-width: 22ch; }
-.stage { position: relative; width: 100%; max-width: 1000px; margin-inline: auto; aspect-ratio: 1000 / 560; }
-.oval { position: absolute; top: 3.571%; height: 92.857%; }
-.oval--say { left: 11%; width: 60%; }
-.oval--how { left: 51%; width: 38%; }
-.oval svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-.oval ellipse { fill: none; stroke: var(--ink); stroke-width: 1.8; }
-.oval--how ellipse { stroke-dasharray: 92 8; stroke-dashoffset: -4; }
-.oval__label {
-  position: absolute; top: 50%; transform: translateY(-50%);
-  font-weight: 500; font-size: clamp(1rem, 2vw, 1.5rem); line-height: 1.25; text-wrap: balance;
-}
-.oval--say .oval__label { left: 13%; width: 46%; }
-.oval--how .oval__label { left: 50%; width: 44%; }
-.knot {
-  position: absolute; width: 4%; aspect-ratio: 1; transform: translate(-50%, -50%); background: var(--ink);
-  clip-path: polygon(50% 0, 58% 42%, 100% 50%, 58% 58%, 50% 100%, 42% 58%, 0 50%, 42% 42%);
-}
-.knot--top { left: 58.76%; top: 12.57%; }
-.knot--bottom { left: 58.76%; top: 87.43%; }
+.stage { display: grid; gap: clamp(10px, 1.6vw, 18px); width: 100%; max-width: 1000px; margin-inline: auto; }
+.stage__svg { display: block; width: 100%; height: auto; overflow: visible; }
+.stage__ink { fill: var(--ink); }
+.stage__label { font: 400 clamp(1.125rem, 1.9vw, 1.5rem)/1.2 var(--display); letter-spacing: -0.01em; max-width: none; }
+.stage__label--say { justify-self: start; margin-left: 11%; }
+.stage__label--how { justify-self: end; margin-right: 11%; text-align: right; }
 .connect__foot {
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 80px); align-items: end;
 }
@@ -230,23 +238,26 @@ p { max-width: 62ch; text-wrap: pretty; }
 /* Service cards: the four tiles from her brand guidelines' colour page (cream outlined, sky, moss, brown). */
 .services { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(14px, 1.6vw, 22px); }
 .service {
-  display: grid; grid-row: span 3; grid-template-rows: subgrid; row-gap: 14px; align-content: start; min-width: 0;
-  padding: clamp(24px, 2.4vw, 34px); border-radius: 24px; background: var(--paper); color: var(--ink);
+  display: grid; grid-row: span 4; grid-template-rows: subgrid; row-gap: 14px; align-content: start; min-width: 0;
+  padding: clamp(24px, 2.4vw, 34px); border-radius: var(--r-card); background: var(--paper); color: var(--ink);
 }
-.service > p { color: var(--ink-soft); }
+.service > p:not(.service__proof) { color: var(--ink-soft); }
 .service .dots { margin-top: 10px; padding-top: 18px; border-top: 1px solid var(--rule); font-size: 1rem; }
+.service__proof { align-self: end; padding-top: 10px; font-size: 1rem; font-weight: 500; }
+.service__proof a { text-decoration: underline; }
 .service--cream { box-shadow: inset 0 0 0 1.5px var(--ink); }
 .service--sky { background: var(--sky); }
 .service--moss { background: var(--moss); color: var(--paper); }
 .service--ink { background: var(--ink); color: var(--paper); }
-.service--moss > p, .service--ink > p { color: rgba(255, 249, 236, 0.86); }
+.service--moss > p:not(.service__proof), .service--ink > p:not(.service__proof) { color: rgba(255, 249, 236, 0.86); }
 .service--moss .dots, .service--ink .dots { border-top-color: rgba(255, 249, 236, 0.28); }
-.service--moss .dots li::before, .service--ink .dots li::before { background: var(--paper); }
+.service--moss .dots li::before, .service--ink .dots li::before { border-color: var(--paper); }
+.service--moss :focus-visible, .service--ink :focus-visible { outline-color: var(--paper); }
 
 .work { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(24px, 2.6vw, 40px); }
-.case { display: grid; grid-template-rows: auto auto auto 1fr auto; gap: 12px; min-width: 0; }
+.case { display: grid; grid-template-rows: auto auto auto 1fr auto; gap: 12px; min-width: 0; scroll-margin-top: 110px; }
 .case .photo { margin-bottom: 10px; }
-.case__role { font-size: 1rem; font-weight: 500; color: var(--moss); }
+.case__role { font-size: 1rem; font-weight: 500; color: var(--ink-soft); }
 .case__summary { color: var(--ink-soft); }
 .case__facts {
   display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding-top: 14px;
@@ -261,10 +272,10 @@ p { max-width: 62ch; text-wrap: pretty; }
 .bts__text { display: grid; gap: 12px; min-width: 0; }
 .bts__text p { color: var(--ink-soft); }
 .bts__strip {
-  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(132px, 1fr); gap: 12px;
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(132px, 1fr); gap: 10px;
   overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; min-width: 0;
 }
-.bts__strip .photo { scroll-snap-align: start; border-radius: 18px; }
+.bts__strip .photo { scroll-snap-align: start; }
 
 .about .wrap {
   display: grid; grid-template-columns: minmax(0, 0.75fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 96px);
@@ -280,12 +291,12 @@ p { max-width: 62ch; text-wrap: pretty; }
   align-items: start; padding-block: var(--section);
 }
 .start__intro { display: grid; gap: 20px; min-width: 0; position: sticky; top: 112px; }
-.start__intro .dots li::before { background: var(--paper); }
+.start__intro .dots li::before { border-color: var(--paper); }
 .start__intro .dots { font-size: 1.1875rem; }
 
 .intake {
   display: grid; gap: 26px; min-width: 0;
-  background: var(--paper); color: var(--ink); border-radius: 24px; padding: clamp(22px, 3.2vw, 44px);
+  background: var(--paper); color: var(--ink); border-radius: 12px; padding: clamp(22px, 3.2vw, 44px);
 }
 .intake :focus-visible { outline-color: var(--ink); }
 .intake__head { display: grid; gap: 6px; }
@@ -297,8 +308,8 @@ p { max-width: 62ch; text-wrap: pretty; }
 .hint { font-size: 1rem; color: var(--ink-soft); }
 input[type="text"], input[type="email"], select, textarea {
   width: 100%; box-sizing: border-box; min-height: 52px; padding: 12px 14px;
-  border: 1.5px solid var(--ink-soft); border-radius: 12px; background: #fffdf7; color: var(--ink);
-  font: 400 1.0625rem/1.4 var(--text);
+  border: 1.5px solid var(--ink-soft); border-radius: var(--r-field); background: #fffdf7; color: var(--ink);
+  font: 400 1.0625rem/1.4 var(--text); caret-color: var(--moss);
 }
 textarea { min-height: 112px; resize: vertical; }
 select { appearance: none; padding-right: 44px; cursor: pointer;
@@ -319,19 +330,18 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
 .dot-opt input:checked + span { background: var(--moss); border-color: var(--moss); color: var(--paper); }
 .dot-opt input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 3px; }
 
-.chips { display: flex; flex-wrap: wrap; gap: 10px; }
-.chip {
-  display: inline-flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 16px 0 12px;
-  border: 1.5px solid var(--ink-soft); border-radius: 999px; font-size: 1rem; cursor: pointer;
+/* Support options: a ruled checklist, each row a full-width target */
+.checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; margin-top: 4px; }
+.check {
+  display: flex; align-items: flex-start; gap: 12px; min-height: 48px; box-sizing: border-box;
+  padding: 12px 0; border-top: 1px solid var(--rule); cursor: pointer; line-height: 1.4;
 }
-.chip input { width: 18px; height: 18px; margin: 0; accent-color: var(--moss); }
-.chip:has(input:checked) { background: var(--moss-tint); border-color: var(--moss); }
-.chip:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
-.chip input:focus-visible { outline: none; }
+.check input { flex: none; width: 20px; height: 20px; margin: 1px 0 0; }
+.check:has(input:checked) { color: var(--moss-deep); font-weight: 500; }
 
-.intake__submit { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 20px; padding-top: 6px; }
+.intake__submit { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; padding-top: 6px; }
 .intake__status {
-  padding: 14px 16px; border-radius: 12px; background: var(--sky); color: var(--ink); font-size: 1rem;
+  padding: 14px 16px; border-radius: var(--r-field); background: var(--sky); color: var(--ink); font-size: 1rem;
 }
 
 /* Footer */
@@ -342,7 +352,7 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
 .footer .wordmark { width: 210px; color: var(--paper); }
 .footer__col { display: grid; gap: 8px; align-content: start; font-size: 1rem; }
 .footer__col .h4 { margin-bottom: 4px; }
-.footer a { min-height: 44px; display: inline-flex; align-items: center; text-underline-offset: 4px; }
+.footer a { min-height: 44px; display: inline-flex; align-items: center; font-size: 1.125rem; }
 .footer :focus-visible { outline-color: var(--paper); }
 .footer__legal {
   display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px;
@@ -359,6 +369,10 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
 @media (max-width: 1100px) {
   .services { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+@media (max-width: 1024px) {
+  .hero__media { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hero__clip--last { display: none; }
+}
 @media (max-width: 960px) {
   .about .wrap, .start .wrap, .bts, .connect__foot { grid-template-columns: minmax(0, 1fr); }
   .about__photo { width: min(100%, 360px); justify-self: start; }
@@ -369,24 +383,20 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
   .case > :not(.photo) { grid-column: 2; }
   .footer__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .footer__brand { grid-column: 1 / -1; }
-  .oval ellipse { stroke-width: 3; }
-}
-@media (max-width: 1024px) {
-  .hero__media { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .hero__clip--last { display: none; }
-}
-@media (max-width: 600px) {
-  .hero__media { grid-template-columns: minmax(0, 1fr); gap: 0; }
-  .hero__clip--side { display: none; }
 }
 @media (max-width: 720px) {
   :root { --header-h: 68px; --bar-h: 92px; }
   .nav { display: none; }
   .wordmark--head { display: none; }
   .mark { display: block; }
-  .pair { grid-template-columns: minmax(0, 1fr); }
+  .pair, .checks { grid-template-columns: minmax(0, 1fr); }
   .hero__pause { top: calc(var(--header-h) + 12px); bottom: auto; }
   .hero .wrap { padding-block: calc(var(--header-h) + 72px) 24px; }
+  .site-header .cta--sm { padding-inline: 22px; }
+}
+@media (max-width: 600px) {
+  .hero__media { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .hero__clip--side { display: none; }
 }
 @media (max-width: 640px) {
   .services { grid-template-columns: minmax(0, 1fr); }
@@ -394,14 +404,18 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
   .case .photo { grid-row: auto; margin-bottom: 8px; }
   .case > :not(.photo) { grid-column: 1; }
   .footer__grid { grid-template-columns: minmax(0, 1fr); }
-  .stage { margin-bottom: 56px; }
-  .oval__label { top: 100%; transform: none; margin-top: 14px; font-size: 1rem; }
-  .oval--say .oval__label { left: 6%; width: 64%; }
-  .oval--how .oval__label { left: auto; right: -4%; width: 100%; text-align: right; }
+  .stage__label--say { margin-left: 4%; }
+  .stage__label--how { margin-right: 4%; }
+}
+@media (max-width: 360px) {
+  .hero .h1 { font-size: 2rem; }
+  .hero .lead { font-size: 1rem; }
+  .hero__copy { gap: 18px; }
+  .hero .wrap { padding-block: calc(var(--header-h) + 64px) 20px; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .btn, .site-header { transition: none; }
+  .oval-btn, .site-header, .cta__ring, .cta__echo { transition: none; }
 }
 </style>
 </head>
@@ -429,7 +443,11 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
       <a href="#services">Services</a>
       <a href="#about">About</a>
     </nav>
-    <a class="btn btn--sm" href="#start">Start a conversation</a>
+    <a class="cta cta--sm" href="#start">
+      <svg class="cta__ring" viewBox="0 0 240 72" preserveAspectRatio="none" aria-hidden="true"><path fill-rule="evenodd" d="M2 36a118 34 0 1 0 236 0a118 34 0 1 0 -236 0Z M7.5 36.5a114 32 0 1 0 228 0a114 32 0 1 0 -228 0Z"/></svg>
+      <svg class="cta__echo" viewBox="0 0 120 72" preserveAspectRatio="none" aria-hidden="true"><path d="M115.2 25.5A58 34 0 1 0 115.2 46.5"/></svg>
+      <span class="cta__text">Start a conversation</span>
+    </a>
   </div>
 </header>
 
@@ -444,16 +462,19 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
     <div class="hero__scrim" aria-hidden="true"></div>
     <div class="wrap">
       <div class="hero__copy">
-        <h1 id="hero-title" class="h1">From a good idea to something real.</h1>
-        <p class="lead">I’m Allie Crawford, a creative partner in Ottawa for founders, educators and artists. I bring strategy, creative direction and the right people together around your idea.</p>
-        <div class="actions">
-          <a class="btn" href="#start">Start a conversation</a>
-          <a class="link" href="#work">See the work</a>
-        </div>
+        <h1 id="hero-title" class="h1">Behind every idea are people with something worth sharing.</h1>
+        <p class="lead">I’m Allie Crawford, a creative partner in Ottawa. I help you work out what to say, then bring in the right people to make it.</p>
+        <a class="cta" href="#start">
+          <svg class="cta__ring" viewBox="0 0 240 72" preserveAspectRatio="none" aria-hidden="true"><path fill-rule="evenodd" d="M2 36a118 34 0 1 0 236 0a118 34 0 1 0 -236 0Z M7.5 36.5a114 32 0 1 0 228 0a114 32 0 1 0 -228 0Z"/></svg>
+          <svg class="cta__echo" viewBox="0 0 120 72" preserveAspectRatio="none" aria-hidden="true"><path d="M115.2 25.5A58 34 0 1 0 115.2 46.5"/></svg>
+          <span class="cta__text">Start a conversation</span>
+        </a>
       </div>
     </div>
     <button class="hero__pause" id="hero-pause" type="button" aria-pressed="false" hidden>
-      <span class="hero__pause-icon" aria-hidden="true"></span><span class="hero__pause-text">Pause video</span>
+      <svg class="i-pause" viewBox="0 0 12 14" aria-hidden="true"><rect x="1" y="1" width="3.2" height="12" rx="0.6"/><rect x="7.8" y="1" width="3.2" height="12" rx="0.6"/></svg>
+      <svg class="i-play" viewBox="0 0 12 14" aria-hidden="true"><path d="M1.5 1.2v11.6c0 .5.5.8.9.5l8.6-5.8c.4-.3.4-.8 0-1.1L2.4.7c-.4-.3-.9 0-.9.5Z"/></svg>
+      <span class="hero__pause-text">Pause video</span>
     </button>
   </section>
 
@@ -461,16 +482,24 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
     <div class="wrap">
       <h2 id="connect-title" class="h2">Having something meaningful to say and knowing how to say it are two different things.</h2>
       <div class="stage" id="stage">
-        <div class="oval oval--say">
-          <svg viewBox="0 0 600 520" aria-hidden="true"><ellipse cx="300" cy="260" rx="298" ry="258"/></svg>
-          <span class="oval__label">Something worth saying</span>
-        </div>
-        <div class="oval oval--how">
-          <svg viewBox="0 0 380 520" aria-hidden="true"><ellipse cx="190" cy="260" rx="188" ry="258" pathLength="100"/></svg>
-          <span class="oval__label">How to say it</span>
-        </div>
-        <span class="knot knot--top" aria-hidden="true"></span>
-        <span class="knot knot--bottom" aria-hidden="true"></span>
+        <p class="stage__label stage__label--say">Something worth saying</p>
+        <svg class="stage__svg" viewBox="0 0 1000 560" role="img" aria-label="Two ovals, something worth saying and how to say it, overlapping to form the Crawford Connected mark">
+          <defs>
+            <filter id="ink-web" x="-30%" y="-10%" width="160%" height="120%" color-interpolation-filters="sRGB">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="2.2" result="soft"/>
+              <feColorMatrix in="soft" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 14 -6"/>
+            </filter>
+            <mask id="c-opening" maskUnits="userSpaceOnUse" x="480" y="-20" width="460" height="600">
+              <rect x="480" y="-20" width="460" height="600" fill="#fff"/>
+              <rect x="842" y="236" width="80" height="88" fill="#000"/>
+            </mask>
+          </defs>
+          <g class="stage__ink" filter="url(#ink-web)">
+            <g class="ring ring--say"><path fill-rule="evenodd" d="M110 280a300 260 0 1 0 600 0a300 260 0 1 0 -600 0Z M119 280a293.5 256 0 1 0 587 0a293.5 256 0 1 0 -587 0Z"/></g>
+            <g class="ring ring--how"><path fill-rule="evenodd" mask="url(#c-opening)" d="M510 280a190 260 0 1 0 380 0a190 260 0 1 0 -380 0Z M518 280a184 256 0 1 0 368 0a184 256 0 1 0 -368 0Z"/></g>
+          </g>
+        </svg>
+        <p class="stage__label stage__label--how">How to say it</p>
       </div>
       <div class="connect__foot">
         <div class="connect__body">
@@ -485,7 +514,7 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
   <section class="section" id="services" aria-labelledby="services-title">
     <div class="wrap">
       <div class="section-head">
-        <h2 id="services-title" class="h2">How I can help</h2>
+        <h2 id="services-title" class="h2">Where I come in</h2>
         <p class="lead">Every project is different. Start with one of these, or combine them.</p>
       </div>
       <ul class="services">
@@ -497,6 +526,7 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
             <li>Marketing and content strategy</li>
             <li>One-time strategy sessions</li>
           </ul>
+          <p class="service__proof">Part of all <a href="#work">three projects below</a></p>
         </li>
         <li class="service service--sky">
           <h3 class="h3">Social media management</h3>
@@ -506,6 +536,7 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
             <li>Monthly shoots and editing</li>
             <li>Captions and posting</li>
           </ul>
+          <p class="service__proof">See <a href="#case-xingfutang">Xing Fu Tang Ottawa</a></p>
         </li>
         <li class="service service--moss">
           <h3 class="h3">Creative direction and production</h3>
@@ -515,6 +546,7 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
             <li>Managing editors, videographers and creatives</li>
             <li>Behind-the-scenes photo and video</li>
           </ul>
+          <p class="service__proof">See <a href="#case-adventures">Adventures in Consciousness</a></p>
         </li>
         <li class="service service--ink">
           <h3 class="h3">Creative projects, start to finish</h3>
@@ -524,6 +556,7 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
             <li>Books, video series and print</li>
             <li>Special projects that don’t fit a box</li>
           </ul>
+          <p class="service__proof">See <a href="#case-books">the painting book series</a></p>
         </li>
       </ul>
     </div>
@@ -532,24 +565,24 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
   <section class="section section--flush-top" id="work" aria-labelledby="work-title">
     <div class="wrap">
       <div class="section-head">
-        <h2 id="work-title" class="h2">Selected work</h2>
+        <h2 id="work-title" class="h2">Projects, and the people behind them</h2>
       </div>
       <div class="work">
-        <article class="case">
+        <article class="case" id="case-adventures">
           <figure class="photo photo--45"><img src="img/work-adventures.webp" width="800" height="1000" loading="lazy" alt="A camera and monitor set up to film a conversation at a table by a window"></figure>
           <h3 class="h3">Adventures in Consciousness</h3>
           <p class="case__role">Creative direction, project management and production</p>
           <p class="case__summary">Jack’s educational YouTube series on consciousness in everyday life, made for students, leaders and communities. I shaped the vision, messaging and structure, coordinated filming and editing, and built the print pieces that carry it further.</p>
           <p class="case__facts"><span>Video series</span><span class="node" aria-hidden="true"></span><span>Print and outreach</span></p>
         </article>
-        <article class="case">
+        <article class="case" id="case-books">
           <figure class="photo photo--45"><img src="img/work-books.webp" width="800" height="1000" loading="lazy" alt="A book from the series on a table, with a painted waterfall on the cover"></figure>
           <h3 class="h3">Landscape Painting Book Series</h3>
           <p class="case__role">Book development and project management</p>
           <p class="case__summary">Gamal’s instructional series turns decades of painting and teaching into clear, step-by-step lessons. I co-developed the structure, shaped the content into teachable formats, and supported production and publishing.</p>
           <p class="case__facts"><span>52 books planned</span><span class="node" aria-hidden="true"></span><span>On Amazon and in Ottawa</span></p>
         </article>
-        <article class="case">
+        <article class="case" id="case-xingfutang">
           <figure class="photo photo--45"><img src="img/work-xingfutang.webp" width="800" height="1000" loading="lazy" style="object-position: center top" alt="The Xing Fu Tang Ottawa Instagram grid: drinks, food close-ups and staff videos"></figure>
           <h3 class="h3">Xing Fu Tang Ottawa</h3>
           <p class="case__role">Social media management since April 2024</p>
@@ -600,12 +633,12 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
           <li>Where you could use support</li>
         </ul>
         <p>From there, we can see where Crawford Connected might fit and whether it makes sense to work together.</p>
-        <p class="small">Prefer email? <span class="select">info@crawfordconnected.ca</span></p>
+        <p class="small">Prefer email? <a href="mailto:info@crawfordconnected.ca">info@crawfordconnected.ca</a></p>
       </div>
 
       <form class="intake" id="intake" aria-labelledby="intake-title">
         <div class="intake__head">
-          <h3 id="intake-title" class="h3">Pre-discovery questions</h3>
+          <h3 id="intake-title" class="h3">A few questions first</h3>
           <p>About five minutes. Fields marked <span class="req">*</span> are required.</p>
         </div>
 
@@ -653,7 +686,7 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
           </div>
         </div>
 
-        <fieldset class="field scale">
+        <fieldset class="field scale" aria-describedby="clarity-ends">
           <legend>How clear do you feel about what you offer, who it’s for and how to communicate its value?</legend>
           <div class="scale__row">
             <label class="dot-opt"><input type="radio" name="clarity" id="f-clarity-1" value="1"><span>1</span></label>
@@ -662,7 +695,7 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
             <label class="dot-opt"><input type="radio" name="clarity" id="f-clarity-4" value="4"><span>4</span></label>
             <label class="dot-opt"><input type="radio" name="clarity" id="f-clarity-5" value="5"><span>5</span></label>
           </div>
-          <div class="scale__ends" aria-hidden="true"><span>1 = Not clear yet</span><span>5 = Very clear</span></div>
+          <div class="scale__ends" id="clarity-ends"><span>1 means not clear yet</span><span>5 means very clear</span></div>
         </fieldset>
 
         <div class="field">
@@ -677,15 +710,15 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
         <fieldset class="field">
           <legend>What kind of support would you like to explore?</legend>
           <span class="hint">Choose any that fit.</span>
-          <div class="chips">
-            <label class="chip"><input type="checkbox" id="f-s1" name="support" value="messaging">Brand messaging and positioning</label>
-            <label class="chip"><input type="checkbox" id="f-s2" name="support" value="strategy">Marketing or social media strategy</label>
-            <label class="chip"><input type="checkbox" id="f-s3" name="support" value="social">Ongoing social media management</label>
-            <label class="chip"><input type="checkbox" id="f-s4" name="support" value="direction">Content planning and creative direction</label>
-            <label class="chip"><input type="checkbox" id="f-s5" name="support" value="production">Content production</label>
-            <label class="chip"><input type="checkbox" id="f-s6" name="support" value="session">One-time strategy session</label>
-            <label class="chip"><input type="checkbox" id="f-s7" name="support" value="project">Creative project support</label>
-            <label class="chip"><input type="checkbox" id="f-s8" name="support" value="unsure">Not sure yet, I’d like guidance</label>
+          <div class="checks">
+            <label class="check"><input type="checkbox" id="f-s1" name="support" value="messaging"><span>Brand messaging and positioning</span></label>
+            <label class="check"><input type="checkbox" id="f-s2" name="support" value="strategy"><span>Marketing or social media strategy</span></label>
+            <label class="check"><input type="checkbox" id="f-s3" name="support" value="social"><span>Ongoing social media management</span></label>
+            <label class="check"><input type="checkbox" id="f-s4" name="support" value="direction"><span>Content planning and creative direction</span></label>
+            <label class="check"><input type="checkbox" id="f-s5" name="support" value="production"><span>Content production</span></label>
+            <label class="check"><input type="checkbox" id="f-s6" name="support" value="session"><span>One-time strategy session</span></label>
+            <label class="check"><input type="checkbox" id="f-s7" name="support" value="project"><span>Creative project support</span></label>
+            <label class="check"><input type="checkbox" id="f-s8" name="support" value="unsure"><span>Not sure yet, I’d like guidance</span></label>
           </div>
         </fieldset>
 
@@ -706,7 +739,7 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
         </div>
 
         <div class="intake__submit">
-          <button class="btn" type="submit">Send my answers</button>
+          <button class="oval-btn" type="submit">Send my answers</button>
           <span class="hint">Allie replies by email to book a call.</span>
         </div>
         <p class="intake__status" id="intake-status" role="status" hidden></p>
@@ -725,7 +758,7 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
       </div>
       <div class="footer__col">
         <h2 class="h4">Contact</h2>
-        <span class="select">info@crawfordconnected.ca</span>
+        <a href="mailto:info@crawfordconnected.ca">info@crawfordconnected.ca</a>
         <a href="https://www.instagram.com/crawford_connected/">Instagram @crawford_connected</a>
       </div>
       <div class="footer__col">
@@ -799,10 +832,9 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
-  // Motion. Every effect starts from a readable state, and none runs under reduced motion.
+  // Header state, then the one authored motion. Nothing starts hidden, and the motion is off under reduced motion.
   (function () {
     var header = document.getElementById("site-header");
-    var hero = document.querySelector(".hero");
     // The first header state applies instantly; fades start after that.
     function allowFades() { setTimeout(function () { header.classList.remove("no-anim"); }, 150); }
     if (document.readyState === "complete") allowFades(); else window.addEventListener("load", allowFades);
@@ -819,43 +851,14 @@ fieldset.field { border: 0; padding: 0; min-width: 0; }
       if (!ctx.conditions.motion) return;
       var wide = ctx.conditions.wide;
 
-      // Hero: the clips settle in from slightly below, then drift as the hero scrolls away.
-      gsap.from(".hero__clip", { yPercent: 4, scale: 1.06, duration: 1.4, ease: "power3.out", stagger: 0.12 });
-      gsap.to(".hero__media", {
-        yPercent: 14, ease: "none",
-        scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: true }
-      });
-
-      // The connection: two ovals start apart and lock into her mark as the stage scrolls into view.
+      // The connection: her two ovals start apart and slide together as the stage scrolls into view.
+      // The ink webs at the crossings come from the filter, so they grow on their own as the rings meet.
       var tl = gsap.timeline({
         scrollTrigger: { trigger: "#stage", start: wide ? "top 80%" : "top 90%", end: wide ? "center 50%" : "center 55%", scrub: 0.8 }
       });
-      tl.from(".oval--say", { xPercent: -26, rotation: -6, ease: "power2.out" }, 0)
-        .from(".oval--how", { xPercent: 52, rotation: 8, ease: "power2.out" }, 0)
-        .from(".knot", { scale: 0, rotation: 45, ease: "back.out(2)", duration: 0.25 }, 0.8)
+      tl.from(".ring--say", { x: -170, rotation: -5, transformOrigin: "50% 50%", ease: "power2.out" }, 0)
+        .from(".ring--how", { x: 210, rotation: 7, transformOrigin: "50% 50%", ease: "power2.out" }, 0)
         .from(".connect__coda", { y: 24, opacity: 0.35, duration: 0.3 }, 0.75);
-
-      // Service cards rise into place one after another; they are readable the whole time.
-      gsap.from(".service", {
-        y: 36, duration: 0.8, ease: "power3.out", stagger: 0.09,
-        scrollTrigger: { trigger: ".services", start: "top 85%", once: true }
-      });
-
-      // Work photos: a gentle parallax inside their frames.
-      gsap.utils.toArray(".case .photo img").forEach(function (img) {
-        gsap.fromTo(img, { yPercent: -5, scale: 1.12 }, {
-          yPercent: 5, scale: 1.12, ease: "none",
-          scrollTrigger: { trigger: img.parentNode, start: "top bottom", end: "bottom top", scrub: true }
-        });
-      });
-
-      // Behind the scenes: the strip drifts sideways on wide screens.
-      if (wide) {
-        gsap.fromTo(".bts__strip", { x: 48 }, {
-          x: -24, ease: "none",
-          scrollTrigger: { trigger: ".bts", start: "top bottom", end: "bottom top", scrub: true }
-        });
-      }
     });
   })();
 </script>
