@@ -1,5 +1,6 @@
-# Crawford Connected website concept
+# Crawford Connected: website preview
 
-A homepage concept prepared by Anthony Balatti for Allie Crawford, October 2026. Not a live site: the form sends nothing.
+A preview of the Crawford Connected website (version 2), built from the agency's Astro project. Not the live site: every
+page carries a "Preview, not live" banner and a noindex tag, and the form sends nothing.
 
-Photos, footage, logo and brand are Crawford Connected's and are used here for the concept only.
+Photos and footage are from Allie Crawford's portfolio, used for this preview only.
